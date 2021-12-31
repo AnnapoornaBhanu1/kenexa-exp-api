@@ -48,6 +48,14 @@ output application/json
 payload.result.'execution-results'.results map($.value.'com.myspace.mappinglookup.mappingClass') reduce $]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
+		<choice doc:name="Choice" doc:id="63d52d5f-6d60-4cb1-aca7-6ed01bd69296" >
+			<when expression='#[vars.orgName == "Apisero"]'>
+				<flow-ref doc:name="Apisero-Kenexa-call" doc:id="b089c22c-7c0c-4099-ad16-82de3efb33de" name="Apisero-Kenexa-call" />
+			</when>
+			<otherwise >
+				<flow-ref doc:name="Wipro-Kenexa-call" doc:id="189ed767-2d93-4d31-8e86-d84feb2b1614" name="Wipro-Kenexa-call"/>
+			</otherwise>
+		</choice>
 		<set-payload value='#[output application/json&#10;---&#10;{&#10;	"first_name": "Annapoorna",&#10;	"middleName": "jdhf",&#10;	"last_name": "Bhanu",&#10;	"salary": 16000,&#10;	"exchangeRate": 0.8&#10;}]' doc:name="Set Payload - Response from HR system" doc:id="0fdffc19-ff9e-493a-a9a6-77632ea9870b" />
 		<ee:transform doc:name="Request to sample-dt decision table" doc:id="8155c043-6988-48ae-bbd5-2b301caa2fb2" >
 			<ee:message >
@@ -103,4 +111,19 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<sub-flow name="Apisero-Kenexa-call" doc:id="1b4353f3-463d-49f9-b5f4-d91b9b1c6dab" >
+		<set-payload value='#[output application/json&#10;---&#10;{&#10;	"fname": "James",&#10;	"mName": "Randy",&#10;	"lname": "Smith",&#10;	"salary": 16000,&#10;	"exchangeRate": 0.8&#10;}]' doc:name="Apisero Kenexa Response" doc:id="bbdcabd7-eafa-4de5-aae6-143239de4017" />
+	</sub-flow>
+	
+	<sub-flow name="Wipro-Kenexa-call" doc:id="3adf518c-7186-41fd-8e22-d5642ba9998b" >
+		<set-payload value='#[output application/json
+&#10;---
+&#10;{
+&#10;	"first_name": "John",
+&#10;	"middle_name": "Chris",
+&#10;	"last_name": "Cena",
+&#10;	"salary": 100000,
+&#10;	"exchangeRate": 0.8
+&#10;}]' doc:name="Wipro Kenexa Response" doc:id="07bf422c-cd6c-4d13-9f4d-a88fc6a0b71d" />
+	</sub-flow>
 </mule>
