@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="drools-apiFlow" doc:id="9baa7a84-08d5-4820-9418-1dc0ca4566de" >
+		<http:listener doc:name="Listener" doc:id="4498f947-471d-4417-8230-84300e27fffa" config-ref="HTTP_Listener_config1" path="/drools" allowedMethods="POST"/>
+		<set-variable value="#[payload.orgName]" doc:name="orgName Variable" doc:id="8947fac8-3a07-483a-8606-c0f821e4a251" variableName="orgName"/>
+		<http:request method="POST" doc:name="Request to mapping lookup decision table" doc:id="f27b0cb0-bf9e-4b04-bf17-18ca13d50997" url="http://localhost:8180/kie-server/services/rest/server/containers/instances/mappingLookup_1.0.0-SNAPSHOT" outputMimeType="application/json">
+			<http:body ><![CDATA[#[{
+  "lookup" : null,
+  "commands" : [ 
+    {
+    "insert" : 
+      {
+          "out-identifier":"mappingLookup_1.0.0-SNAPSHOT",
+          "return-object":"true",
+      "object" :{
+
+          "mappingClass":
+          {
+              "orgName": vars.orgName
+          }
+      }
+      }
+    },
+    {
+    "fire-all-rules" : {}
+    } ]
+}]]]></http:body>
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Basic a2llc2VydmVyOmtpZXNlcnZlcjEh",
+	"Content-Type": "application/json",
+"X-KIE-ContentType" : "JSON"
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="variable mappingLookup" doc:id="613ddccf-f613-4c30-b6d1-97fc251e1983" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="mappingLookup" ><![CDATA[%dw 2.0
+output application/json
+---
+payload.result.'execution-results'.results map($.value.'com.myspace.mappinglookup.mappingClass') reduce $]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<set-payload value='#[output application/json&#10;---&#10;{&#10;	"first_name": "Annapoorna",&#10;	"middleName": "jdhf",&#10;	"last_name": "Bhanu",&#10;	"salary": 16000,&#10;	"exchangeRate": 0.8&#10;}]' doc:name="Set Payload - Response from HR system" doc:id="0fdffc19-ff9e-493a-a9a6-77632ea9870b" />
+		<ee:transform doc:name="Request to sample-dt decision table" doc:id="8155c043-6988-48ae-bbd5-2b301caa2fb2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"commands" : [ 
+    {
+    "insert" : 
+      {
+          "out-identifier":"sample-dt_1.0.0-SNAPSHOT",
+          "return-object":"true",
+      "object" :{
+      	"Organization":
+          {
+    orgName: vars.orgName,
+	firstName: payload[vars.mappingLookup.firstName],
+	middleName: payload[vars.mappingLookup.middleName],
+	lastName: payload[vars.mappingLookup.lastName],
+	"salary": payload.salary,
+	"exchangeRate": payload.exchangeRate	
+	}
+	
+	}
+}
+
+},
+    {
+    "fire-all-rules" : {}
+    } 
+
+]
+
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<http:request method="POST" doc:name="Request to sample-dt lookup decision table" doc:id="b06adff8-43af-400d-972e-8b2c5c39c491" url="http://localhost:8180/kie-server/services/rest/server/containers/instances/sample-dt_1.0.0-SNAPSHOT" outputMimeType="application/json">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Authorization" : "Basic a2llc2VydmVyOmtpZXNlcnZlcjEh",
+	"Content-Type": "application/json",
+"X-KIE-ContentType" : "JSON"
+}]]]></http:headers>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="04205874-88d4-4da2-9d52-8b0d6f95acf9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

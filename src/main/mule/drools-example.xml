@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="a56d4d2c-dd70-4002-bf11-09db8b01c520" >
+		<http:listener-connection host="localhost" port="8081" />
+	</http:listener-config>
+	<flow name="drools-exampleFlow" doc:id="d544ce83-d6d6-41d5-a0d9-cfb6af089540" >
+		<http:listener doc:name="Listener" doc:id="0d88ede3-b2c4-4fe9-8a94-1f3cb1e160d0" path="/drools-test" allowedMethods="POST" outputMimeType="application/json" config-ref="HTTP_Listener_config1"/>
+		<ee:transform doc:name="Transform Message" doc:id="81815fdf-2f64-4015-85ca-422b86309eda" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	orgName: payload.orgName as String,
+	firstName: payload.firstName as String,
+	middleName: payload.middleName as String,
+	lastName: payload.lastName as String
+	
+} as Object {
+	class : "com.drools.example.Name"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value='#[payload&#10;as Object {&#10;	class : "com.drools.example.Name"&#10;}]' doc:name="Set Variable" doc:id="88cce3e3-3373-4c8f-ace3-280467feb78b" variableName="flowName" mimeType="application/java"/>
+		<java:invoke-static doc:name="Invoke static" doc:id="b7ddcbd9-8d9a-43fb-aa72-bf0205dc1f65" class="com.drools.example.RulesEngine" method="executeNameRules(Name)">
+			<java:args ><![CDATA[#[{
+	arg0 : vars.flowName
+}]]]></java:args>
+		</java:invoke-static>
+		<ee:transform doc:name="Transform Message" doc:id="e271d4aa-4f8b-4ab1-a65a-0e07060c7892" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	orgName: vars.flowName.orgName as String,
+	firstName: vars.flowName.firstName as String,
+	middleName: vars.flowName.middleName as String,
+	lastName: vars.flowName.lastName as String
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="9797531d-3cf5-4870-86b1-2b00e4b8bc68" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="ba2432e4-2ada-491e-ba5f-0d8375abaa11" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/dw
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="47786e4d-acab-491f-b09f-b577e97de9de" message="#[payload]"/>
+	
+</flow>
+</mule>
