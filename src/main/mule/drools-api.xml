@@ -35,10 +35,10 @@ output application/json
     {
     "insert" : 
       {
-          "out-identifier":"sample-dt_1.0.0-SNAPSHOT",
+          "out-identifier":"SymphonyTalentComplex_1.0.0-SNAPSHOT",
           "return-object":"true",
       "object" :{
-      	"Organization":
+      	"complexLogicClass":
           {
     orgName: vars.orgName,
 	firstName: payload[vars.mappingLookup.firstName] ,
@@ -61,7 +61,7 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<http:request method="POST" doc:name="Request to sample-dt lookup decision table" doc:id="b06adff8-43af-400d-972e-8b2c5c39c491" url="http://localhost:8180/kie-server/services/rest/server/containers/instances/sample-dt_1.0.0-SNAPSHOT" outputMimeType="application/json">
+		<http:request method="POST" doc:name="Request to sample-dt lookup decision table" doc:id="b06adff8-43af-400d-972e-8b2c5c39c491" url="http://localhost:8180/kie-server/services/rest/server/containers/instances/SymphonyTalentComplex_1.0.0-SNAPSHOT" outputMimeType="application/json">
 			<http:headers ><![CDATA[#[output application/java
 ---
 {
@@ -75,19 +75,19 @@ output application/json
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload.result.'execution-results'.results map($.value.'com.myspace.Organization')]]></ee:set-payload>
+payload.result.'execution-results'.results map($.value.'com.symphony.symphonytalentcomplex.complexLogicClass')]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
 	<sub-flow name="storeMappinginObjectStore_subFlow" doc:id="3caaafba-bfc9-4f20-afaa-15dd57ea2f64" >
-		<http:request method="POST" doc:name="Request to mapping lookup decision table" doc:id="f27b0cb0-bf9e-4b04-bf17-18ca13d50997" url="http://localhost:8180/kie-server/services/rest/server/containers/instances/mappingProject_1.0.0-SNAPSHOT" outputMimeType="application/json">
+		<http:request method="POST" doc:name="Request to mapping lookup decision table" doc:id="f27b0cb0-bf9e-4b04-bf17-18ca13d50997" url="http://localhost:8180/kie-server/services/rest/server/containers/instances/SymphonyTalent_1.0.0-SNAPSHOT" outputMimeType="application/json">
 			<http:body><![CDATA[#[{
   "lookup" : null,
   "commands" : [ 
     {
     "insert" : 
       {
-          "out-identifier":"mappingProject_1.0.0-SNAPSHOT",
+          "out-identifier":"SymphonyTalent_1.0.0-SNAPSHOT",
           "return-object":"true",
       "object" :{
 
@@ -117,7 +117,7 @@ payload.result.'execution-results'.results map($.value.'com.myspace.Organization
 				<ee:set-variable variableName="mappingLookup"><![CDATA[%dw 2.0
 output application/json
 ---
-payload.result.'execution-results'.results map($.value.'com.myspace.mappingproject.mappingLookupClass') reduce $]]></ee:set-variable>
+payload.result.'execution-results'.results map($.value.'com.symphony.symphonytalent.mappingLookupClass') reduce $]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<os:store doc:name="Store" doc:id="62a98177-77e8-4a9f-accb-179171a13bbb" key="#[vars.orgName]" objectStore="Object_store">
