@@ -8,7 +8,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
 	<os:object-store name="Object_store" doc:name="Object store" doc:id="59d0a4a0-8c56-46fc-b449-4259f10ab75b" entryTtl="12" entryTtlUnit="HOURS" expirationIntervalUnit="HOURS" />
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="9c5aa82d-7b19-450f-8d47-3ba5ee0d2610" >
-		<http:listener-connection host="0.0.0.0" port="8081" />
+		<http:listener-connection host="localhost" port="8081" />
 	</http:listener-config>
 	<flow name="drools-apiFlow" doc:id="9baa7a84-08d5-4820-9418-1dc0ca4566de" >
 		<http:listener doc:name="Listener" doc:id="4498f947-471d-4417-8230-84300e27fffa" config-ref="HTTP_Listener_config" path="/drools" allowedMethods="POST"/>
@@ -20,8 +20,8 @@ http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/cu
 			<os:default-value><![CDATA[#[null]]]></os:default-value>
 		</os:retrieve>
 			</when>
-			<otherwise >
-				<flow-ref doc:name="storeMappinginObjectStore_subFlow" doc:id="7b849fe9-e2b6-497a-8d04-51d599456f42" name="storeMappinginObjectStore_subFlow"/>
+			<otherwise>
+				<flow-ref doc:name="storeMappinginObjectStore_subFlow" doc:id="7b849fe9-e2b6-497a-8d04-51d599456f42" name="storeMappinginObjectStore_subFlow" />
 			</otherwise>
 		</choice>
 		<flow-ref doc:name="Kenexa call" doc:id="b089c22c-7c0c-4099-ad16-82de3efb33de" name='#[vars.orgName ++ "-Kenexa-call"]' />
@@ -80,18 +80,18 @@ payload.result.'execution-results'.results map($.value.'com.myspace.Organization
 		</ee:transform>
 	</flow>
 	<sub-flow name="storeMappinginObjectStore_subFlow" doc:id="3caaafba-bfc9-4f20-afaa-15dd57ea2f64" >
-		<http:request method="POST" doc:name="Request to mapping lookup decision table" doc:id="f27b0cb0-bf9e-4b04-bf17-18ca13d50997" url="http://localhost:8180/kie-server/services/rest/server/containers/instances/mappingLookup_1.0.0-SNAPSHOT" outputMimeType="application/json">
+		<http:request method="POST" doc:name="Request to mapping lookup decision table" doc:id="f27b0cb0-bf9e-4b04-bf17-18ca13d50997" url="http://localhost:8180/kie-server/services/rest/server/containers/instances/mappingProject_1.0.0-SNAPSHOT" outputMimeType="application/json">
 			<http:body><![CDATA[#[{
   "lookup" : null,
   "commands" : [ 
     {
     "insert" : 
       {
-          "out-identifier":"mappingLookup_1.0.0-SNAPSHOT",
+          "out-identifier":"mappingProject_1.0.0-SNAPSHOT",
           "return-object":"true",
       "object" :{
 
-          "mappingClass":
+          "mappingLookupClass":
           {
               "orgName": vars.orgName
           }
@@ -117,18 +117,18 @@ payload.result.'execution-results'.results map($.value.'com.myspace.Organization
 				<ee:set-variable variableName="mappingLookup"><![CDATA[%dw 2.0
 output application/json
 ---
-payload.result.'execution-results'.results map($.value.'com.myspace.mappinglookup.mappingClass') reduce $]]></ee:set-variable>
+payload.result.'execution-results'.results map($.value.'com.myspace.mappingproject.mappingLookupClass') reduce $]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
 		<os:store doc:name="Store" doc:id="62a98177-77e8-4a9f-accb-179171a13bbb" key="#[vars.orgName]" objectStore="Object_store">
 			<os:value ><![CDATA[#[vars.mappingLookup]]]></os:value>
 		</os:store>
 	</sub-flow>
-	<sub-flow name="Apisero-Kenexa-call" doc:id="1b4353f3-463d-49f9-b5f4-d91b9b1c6dab" >
-		<set-payload value='#[output application/json&#10;---&#10;{&#10;	"fname": "James",&#10;	"mName": "Randy",&#10;	"lname": "Smith",&#10;	"salary": 16000,&#10;	"exchangeRate": 0.8&#10;}]' doc:name="Apisero Kenexa Response" doc:id="bbdcabd7-eafa-4de5-aae6-143239de4017" />
+	<sub-flow name="ibm-Kenexa-call" doc:id="1b4353f3-463d-49f9-b5f4-d91b9b1c6dab" >
+		<set-payload value='#[output application/json&#10;---&#10;{&#10;	"fname": "James",&#10;	"mname": "Randy",&#10;	"lname": "Smith",&#10;	"salary": 16000,&#10;	"exchangeRate": 0.8&#10;}]' doc:name="Apisero Kenexa Response" doc:id="bbdcabd7-eafa-4de5-aae6-143239de4017" />
 	</sub-flow>
 	
-	<sub-flow name="Wipro-Kenexa-call" doc:id="3adf518c-7186-41fd-8e22-d5642ba9998b" >
+	<sub-flow name="xyz-Kenexa-call" doc:id="3adf518c-7186-41fd-8e22-d5642ba9998b" >
 		<set-payload value='#[output application/json
 &#10;---
 &#10;{
@@ -139,4 +139,8 @@ payload.result.'execution-results'.results map($.value.'com.myspace.mappinglooku
 &#10;	"exchangeRate": 0.8
 &#10;}]' doc:name="Wipro Kenexa Response" doc:id="07bf422c-cd6c-4d13-9f4d-a88fc6a0b71d" />
 	</sub-flow>
+	<flow name="drools-apiFlow1" doc:id="7f094703-958b-4a65-a867-c453d0c50dfe" >
+		<http:listener doc:name="Listener" doc:id="189d4699-02bc-41b7-bfdd-a69c4e258992" config-ref="HTTP_Listener_config" path="/clear"/>
+		<os:clear doc:name="Clear" doc:id="8c714da8-d91e-4b14-8c53-be7dc6915c55" objectStore="Object_store"/>
+	</flow>
 </mule>
