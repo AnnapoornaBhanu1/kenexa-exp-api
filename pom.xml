@@ -30,7 +30,7 @@
 						<muleVersion>${mule.version}</muleVersion>
 						<username>${anypoint.username}</username>
 						<password>${anypoint.password}</password>
-						<applicationName>${cloudhub.app}</applicationName>
+						<applicationName>${cloudhub.app}-kenexa-exp-api</applicationName>
 						<environment>${cloudhub.environment}</environment>
 						<businessGroup>${cloudhub.bg}</businessGroup>
 						<workerType>${cloudhub.worker}</workerType>
